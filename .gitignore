@@ -14,3 +14,8 @@
 *pythia_sample_old/
 *pythia/
 # *.npy
+.ipynb_checkpoints/
+wandb/
+
+.DS_Store
+/vscode/
