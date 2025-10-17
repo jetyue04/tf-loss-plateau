@@ -244,7 +244,7 @@ class GPTLinear(nn.Module):
     # -------------------------------------------
 
 
-    def forward(self, idx, targets=None):
+    def forward(self, idx, prompt_len, targets=None):
         device = idx.device
         b, t = idx.size()
         assert (
@@ -276,13 +276,17 @@ class GPTLinear(nn.Module):
 
         # if we are given some desired targets also calculate the loss
         loss = None
+
         if targets is not None:
+            # Masking input tokens
+            targets_masked = targets.clone()
+            targets_masked[:, :prompt_len - 1] = -1
             loss = F.cross_entropy(
                 logits.reshape(-1, logits.size(-1)),
-                targets.reshape(-1),
+                targets_masked.reshape(-1),
                 ignore_index=-1,
             )
-
+        
         if self.return_att:
             return attn_map, pre_lm_h, logits, loss
         
@@ -290,7 +294,7 @@ class GPTLinear(nn.Module):
     
     @torch.no_grad()
     def generate(
-        self, idx, max_new_tokens, temperature=1.0, do_sample=False, top_k=None
+        self, idx, max_new_tokens, prompt_len, temperature=1.0, do_sample=False, top_k=None
     ):
         """
         Take a conditioning sequence of indices idx (LongTensor of shape (b,t)) and complete
@@ -304,7 +308,7 @@ class GPTLinear(nn.Module):
                 idx if idx.size(1) <= self.block_size else idx[:, -self.block_size :]
             )
             # forward the model to get the logits for the index in the sequence
-            _, _, logits, _ = self(idx_cond)
+            _, _, logits, _ = self(idx_cond, prompt_len)
             # pluck the logits at the final step and scale by desired temperature
             logits = logits[:, -1, :] / temperature
             # optionally crop the logits to only the top k options
