@@ -655,7 +655,6 @@ config = {
 config = DotMap(config)
 config.model.vocab_size = max(config.data.p, config.data.max_num) + 1
 config.model.block_size = 2 * config.data.num_tokens + 1
-config.train.num_steps = 1000
 
 data_sampler = MovingWindowSum(
     min_num=config.data.min_num,
