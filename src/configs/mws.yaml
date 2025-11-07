@@ -8,12 +8,8 @@ data:
   tasks:
     - name: 'MovingWindowSum'
       sep: 17
-      n_train: 128
-      n_test: 32
-    - name: 'MovingWindowProduct'
-      sep: 0
-      n_train: 128
-      n_test: 32
+      n_train: 256
+      n_test: 64
   min_num: 1
   max_num: 16
   k: 2 # Window size
@@ -31,7 +27,7 @@ train:
   num_steps: 500
   norm_type: "none_rank"
   wandb: True
-  wandb_run_name: 'mix_mws_mwp_linear_embeddingFrozen'
+  wandb_run_name: 'mws_linear_embeddingFrozen'
   wandb_project: 'loss_plateau_tf'
   save_ckpt: False
   ckpt_freq: 20

@@ -59,7 +59,10 @@ def train_step(
     optim.zero_grad(set_to_none=True)
 
     _, _, _, loss = model(
-        train_data[:, :-1], targets=train_data[:, 1:], prompt_len =prompt_len, mask_input=False
+        train_data[:, :-1], 
+        targets=train_data[:, 1:], 
+        prompt_len =prompt_len, 
+        mask_input=config.train.mask_input,
     )
     loss.backward()
 
@@ -71,7 +74,12 @@ def train_step(
     model.eval()
     with torch.no_grad():
         # Log train loss, train / test acc, repetition frequency
-        attn_map, pre_lm_h, _, train_loss = model(train_data[:, :-1], targets=train_data[:, 1:], prompt_len =prompt_len,mask_input=False)
+        attn_map, pre_lm_h, _, train_loss = model(
+            train_data[:, :-1], 
+            targets=train_data[:, 1:], 
+            prompt_len =prompt_len, 
+            mask_input=config.train.mask_input,
+            )
 
         train_pred = model.generate(
             idx=train_data[:, :prompt_len],
