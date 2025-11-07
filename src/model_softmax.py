@@ -47,7 +47,7 @@ class CausalSelfAttention(nn.Module):
     explicit implementation here to show that there is nothing too scary here.
     """
 
-    def __init__(self, config, return_att=False, mask_input_loss=True):
+    def __init__(self, config, return_att=False):
         super().__init__()
         assert config.n_embd % config.n_head == 0
 
@@ -151,13 +151,12 @@ class Block(nn.Module):
 class GPTSoftmax(nn.Module):
     """GPT Language Model"""
 
-    def __init__(self, config, return_att=False, mask_input_loss=True):
+    def __init__(self, config, return_att=False):
         super().__init__()
         assert config.vocab_size is not None
         assert config.block_size is not None
         self.block_size = config.block_size
         self.return_att = return_att
-        self.mask_input_loss = mask_input_loss
 
         self.transformer = nn.ModuleDict(
             dict(
@@ -247,7 +246,7 @@ class GPTSoftmax(nn.Module):
     # -------------------------------------------
 
 
-    def forward(self, idx, prompt_len, targets=None):
+    def forward(self, idx, prompt_len, targets=None, mask_input = False):
         device = idx.device
         b, t = idx.size()
         assert (
@@ -282,7 +281,7 @@ class GPTSoftmax(nn.Module):
         if targets is not None:
             # Masking input tokens
             targets_masked = targets.clone()
-            if self.mask_input_loss:
+            if mask_input:
                 targets_masked[:, :prompt_len - 1] = -1
             loss = F.cross_entropy(
                 logits.reshape(-1, logits.size(-1)),

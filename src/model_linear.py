@@ -244,7 +244,7 @@ class GPTLinear(nn.Module):
     # -------------------------------------------
 
 
-    def forward(self, idx, prompt_len, targets=None):
+    def forward(self, idx, prompt_len, targets=None, mask_input = False):
         device = idx.device
         b, t = idx.size()
         assert (
@@ -280,7 +280,8 @@ class GPTLinear(nn.Module):
         if targets is not None:
             # Masking input tokens
             targets_masked = targets.clone()
-            targets_masked[:, :prompt_len - 1] = -1
+            if mask_input:
+                targets_masked[:, :prompt_len - 1] = -1
             loss = F.cross_entropy(
                 logits.reshape(-1, logits.size(-1)),
                 targets_masked.reshape(-1),

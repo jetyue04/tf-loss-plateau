@@ -459,5 +459,55 @@ class Repeat:
 
         return samples
 
+class MovingWindowProduct:
+    def __init__(self, min_num=1, max_num=16, k=2, p=17, sep=17, device="cuda"):
+        self.min_num = min_num
+        self.max_num = max_num
+        self.k = k
+        self.p = p
+        self.sep = sep
+        self.device = device
+        assert self.p > self.max_num
+
+    @torch.no_grad()
+    def sample(
+        self,
+        num_samples,
+        num_tokens,
+    ):
+        random_ints = torch.randint(
+            low=self.min_num, high=self.max_num + 1, size=(num_samples, num_tokens)
+        ).to(self.device)
+
+        # random_ints_np = random_ints.detach().cpu().numpy()
+        moving_product = random_ints.clone().detach()
+        for j in range(self.k - 1, random_ints.shape[1]):
+            # product over the window ending at index j
+            moving_product[:, j] = torch.prod(random_ints[:, j-self.k+1:j+1], dim=1)
+
+        # for i in range(num_samples):
+        #     for j in range(0, self.k - 1):
+        #         if moving_sum[i, j] != random_ints[i, j]:
+        #             print(f"ERROR! {i} {j}")
+        #     for j in range(self.k - 1, num_tokens):
+        #         if moving_sum[i, j] != torch.sum(random_ints[i, j-self.k+1:j+1]):
+        #             print(f"ERROR! {i} {j}")
+
+        # exit()
+        samples = (
+            torch.cat(
+                [
+                    random_ints,
+                    self.sep * torch.ones(size=(num_samples, 1)).to(self.device),
+                    torch.remainder(input=moving_product, other=self.p),
+                ],
+                axis=-1,
+            )
+            .to(int)
+            .detach()
+        )
+
+        return samples
+    
 if __name__ == "__main__":
     pass

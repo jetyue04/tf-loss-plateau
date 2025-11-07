@@ -16,6 +16,6 @@
 # *.npy
 .ipynb_checkpoints/
 wandb/
-
+logs/
 .DS_Store
 /vscode/
