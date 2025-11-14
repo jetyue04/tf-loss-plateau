@@ -11,6 +11,7 @@ This project explores theoretical ML phenomena, focusing on loss plateaus in tra
 - `notebooks/` — Notebooks for testing and ablation studies  
 - `src/` — Source code modules  
   - `legacy/` — Original code from the paper  
+  - `config/` - Configuration files for experiments
 - `logs/` — Log files (ignored in git)  
 - `wandb/` — Weights & Biases tracking directory (ignored in git)  
 - `train.py` — Main training script  

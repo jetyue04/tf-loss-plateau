@@ -1,6 +1,6 @@
 model:
   n_layer: 1
-  n_head: 1
+  n_head: 2
   n_embd: 256
   linear: True
 
@@ -20,7 +20,7 @@ data:
   p: 17 # Mod p - Dicates Vocab Size
   cot: False # No idea what this is - can delete
   num_tokens: 16
-  n_train: 256 ## DOn't think we need this??
+  n_train: 256
   n_test: 64
   fixed_len: True
   mix: 'random'
@@ -28,13 +28,13 @@ data:
 train:
   lr: 0.0001
   grad_clip: -1
-  num_steps: 500
+  num_steps: 1000
   norm_type: "none_rank"
   wandb: True
-  wandb_run_name: 'mix_mws_mwp_linear_embeddingFrozen'
+  wandb_run_name: 'mix_mws_mwp_linear_2head'
   wandb_project: 'loss_plateau_tf'
   save_ckpt: False
   ckpt_freq: 20
   seed: 67
   mask_input: True # If we are masking the loss on the input sequence
-  freeze_embedding: True
+  freeze_embedding: False

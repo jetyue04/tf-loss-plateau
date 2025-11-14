@@ -2,25 +2,21 @@ model:
   n_layer: 1
   n_head: 1
   n_embd: 256
-  linear: True
+  linear: False
 
 data:
   tasks:
-    - name: 'MovingWindowSum'
-      sep: 17
-      n_train: 128
-      n_test: 32
     - name: 'MovingWindowProduct'
-      sep: 0
-      n_train: 128
-      n_test: 32
+      sep: 17
+      n_train: 256
+      n_test: 64
   min_num: 1
   max_num: 16
   k: 2 # Window size
   p: 17 # Mod p - Dicates Vocab Size
   cot: False # No idea what this is - can delete
   num_tokens: 16
-  n_train: 256 ## DOn't think we need this??
+  n_train: 256
   n_test: 64
   fixed_len: True
   mix: 'random'
@@ -28,13 +24,13 @@ data:
 train:
   lr: 0.0001
   grad_clip: -1
-  num_steps: 500
+  num_steps: 1000
   norm_type: "none_rank"
   wandb: True
-  wandb_run_name: 'mix_mws_mwp_linear_embeddingFrozen'
+  wandb_run_name: 'mwp_softmax_embeddingFrozen'
   wandb_project: 'loss_plateau_tf'
   save_ckpt: False
   ckpt_freq: 20
   seed: 67
-  mask_input: True # If we are masking the loss on the input sequence
+  mask_input: False # If we are masking the loss on the input sequence
   freeze_embedding: True
