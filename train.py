@@ -49,10 +49,10 @@ def prepare_data_samplers(config):
         task = config.data.tasks[i]
         task_class = getattr(data, task.name)
         data_samplers[task.name] = task_class(
-            min_num=config.data.min_num,
-            max_num=config.data.max_num,
-            k=config.data.k if hasattr(config.data, 'k') else None,
-            p=config.data.p if hasattr(config.data, 'p') else None,
+            min_num=task.min_num,
+            max_num=task.max_num,
+            k=task.k if hasattr(task, 'k') else config.data.k,
+            p=task.p if hasattr(task, 'p') else config.data.p,
             sep=task.sep,
         )
     return data_samplers
@@ -70,7 +70,8 @@ def main(args):
     set_seed(seed)
 
     # Model settings -- May needs tweaking
-    config.model.vocab_size = max(getattr(config.data, "p", 16), config.data.max_num) + 1
+    n_tasks = len(config.data)
+    config.model.vocab_size = max(getattr(config.data, "p", 16), config.data.max_num) + n_tasks
     config.model.block_size = 2 * config.data.num_tokens + 1
 
     # Prepare data samplers

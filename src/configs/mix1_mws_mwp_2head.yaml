@@ -10,17 +10,25 @@ data:
       sep: 17
       n_train: 128
       n_test: 32
+      min_num: 1
+      max_num: 16 
+      k: 1
+      p: 17
     - name: 'MovingWindowProduct'
-      sep: 0
+      sep: 18
       n_train: 128
       n_test: 32
+      min_num: 1
+      max_num: 16
+      k: 2
+      p: 17
   min_num: 1
   max_num: 16
   k: 2 # Window size
   p: 17 # Mod p - Dicates Vocab Size
   cot: False # No idea what this is - can delete
   num_tokens: 16
-  n_train: 256
+  n_train: 256 ## DOn't think we need this??
   n_test: 64
   fixed_len: True
   mix: 'random'
@@ -31,10 +39,10 @@ train:
   num_steps: 1000
   norm_type: "none_rank"
   wandb: True
-  wandb_run_name: 'mix_mws_mwp_linear_2head'
+  wandb_run_name: 'mix_mwsk1_mwpk2_linear_2head_embeddingNotFrozen_inputsMasked'
   wandb_project: 'loss_plateau_tf'
   save_ckpt: False
   ckpt_freq: 20
   seed: 67
-  mask_input: True # If we are masking the loss on the input sequence
+  mask_input: true # If we are masking the loss on the input sequence
   freeze_embedding: False
