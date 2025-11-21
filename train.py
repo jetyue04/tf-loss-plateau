@@ -41,20 +41,14 @@ def load_config(config_path: str):
     return cfg
 
 
-def prepare_data_samplers(config):
+def prepare_data_samplers(config, device):
     """Create a dict of data samplers for each task."""
     num_task = len(config.data.tasks)
     data_samplers = {}
     for i in range(num_task):
         task = config.data.tasks[i]
         task_class = getattr(data, task.name)
-        data_samplers[task.name] = task_class(
-            min_num=task.min_num,
-            max_num=task.max_num,
-            k=task.k if hasattr(task, 'k') else config.data.k,
-            p=task.p if hasattr(task, 'p') else config.data.p,
-            sep=task.sep,
-        )
+        data_samplers[task.name] = task_class(task, device)
     return data_samplers
 
 
@@ -70,12 +64,12 @@ def main(args):
     set_seed(seed)
 
     # Model settings -- May needs tweaking
-    n_tasks = len(config.data)
-    config.model.vocab_size = max(getattr(config.data, "p", 16), config.data.max_num) + n_tasks
+    n_tasks = len(config.data.tasks)
+    config.model.vocab_size = max(getattr(config.data, "p", 17), config.data.max_num) + n_tasks
     config.model.block_size = 2 * config.data.num_tokens + 1
 
     # Prepare data samplers
-    data_samplers = prepare_data_samplers(config)
+    data_samplers = prepare_data_samplers(config, device)
 
     # Initialize model
     if config.model.linear:
