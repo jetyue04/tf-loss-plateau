@@ -12,7 +12,7 @@ data:
       n_test: 32
       min_num: 1
       max_num: 16 
-      k: 1
+      k: 2
       p: 17
     - name: 'MovingWindowProduct'
       sep: 18
@@ -39,7 +39,7 @@ train:
   num_steps: 1000
   norm_type: "none_rank"
   wandb: True
-  wandb_run_name: 'mix_mwsk1_mwpk2_linear_2head_embeddingNotFrozen_inputsMasked'
+  wandb_run_name: 'mix_mwsk2_mwpk2_linear_2head_embeddingNotFrozen_inputsMasked'
   wandb_project: 'loss_plateau_tf'
   save_ckpt: False
   ckpt_freq: 20
