@@ -113,6 +113,54 @@ class MovingWindowProduct:
 
         return samples
 
+class MovingWindowDifference:
+    def __init__(self, config, device="cuda"):
+        self.min_num = getattr(config, "min_num", 1)
+        self.max_num = getattr(config, "max_num", 16)
+        self.k = getattr(config, "k", 2)
+        self.p = getattr(config, "p", 17)
+        self.sep = getattr(config, "sep", 17)
+        self.device = device
+        assert self.p > self.max_num
+
+    @torch.no_grad()
+    def sample(
+        self,
+        num_samples,
+        num_tokens,
+    ):
+        random_ints = torch.randint(
+            low=self.min_num, high=self.max_num + 1, size=(num_samples, num_tokens)
+        ).to(self.device)
+
+        random_ints_np = random_ints.detach().cpu().numpy()
+
+        moving_difference = random_ints.clone().detach()
+        moving_difference = random_ints.clone()
+
+        for j in range(self.k - 1, num_tokens):
+            window = random_ints[:, j - self.k + 1 : j + 1]  # shape (num_samples, k)
+            d = window[:, 0]
+            for t in range(1, self.k):
+                d = d - window[:, t]  # subtract all other elements in the window
+            moving_difference[:, j] = d
+
+        samples = (
+            torch.cat(
+                [
+                    random_ints,
+                    self.sep * torch.ones(size=(num_samples, 1)).to(self.device),
+                    torch.remainder(input=moving_difference, other=self.p),
+                ],
+                axis=-1,
+            )
+            .to(int)
+            .detach()
+        )
+
+        return samples
+
+
 ### Need to edit below to all become config based
 class HardWindowSum:
     def __init__(self, min_num=1, max_num=16, k=2, p=17, sep=17, device="cuda"):
