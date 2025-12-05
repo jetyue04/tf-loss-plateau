@@ -1,9 +1,0 @@
-wandb: Currently logged in as: jetyue04 (wth_ucsd). Use `wandb login --relogin` to force relogin
-wandb: wandb version 0.23.0 is available!  To upgrade, please run:
-wandb:  $ pip install wandb --upgrade
-wandb: Tracking run with wandb version 0.16.0
-wandb: Run data is saved locally in /home/jyue/private/tf-loss-plateau/wandb/run-20251121_040821-zpkxk4py
-wandb: Run `wandb offline` to turn off syncing.
-wandb: Syncing run mix_mwsk2_mwpk2_linear_embeddingFrozen_inputsMasked
-wandb: ⭐️ View project at https://wandb.ai/wth_ucsd/loss_plateau_tf
-wandb: 🚀 View run at https://wandb.ai/wth_ucsd/loss_plateau_tf/runs/zpkxk4py

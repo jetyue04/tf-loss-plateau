@@ -8,7 +8,8 @@ This project explores theoretical ML phenomena, focusing on loss plateaus in tra
 
 ## Project Structure
 
-- `notebooks/` — Notebooks for testing and ablation studies  
+- `notebooks/` — Notebooks for testing and ablation studies 
+- `logs/` - Logs for batch jobs 
 - `src/` — Source code modules  
   - `legacy/` — Original code from the paper  
   - `config/` - Configuration files for experiments
