@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from .base_data import BaseDataTask
 
-class MovingWindowSum(BaseDataTask):
+class HardWindowSum(BaseDataTask):
     def __init__(self, config, device="cuda"):
         super().__init__(config, device)
         self.min_num = getattr(config, "min_num", 1)
@@ -30,30 +30,19 @@ class MovingWindowSum(BaseDataTask):
                 )
                 for i in range(random_ints.shape[0])
             ]
-        )
-<<<<<<< HEAD
-        moving_sum = random_ints.clone().detach()
-        moving_sum[:, self.k - 1 :] = convolution
+        ).to(self.device)
 
-=======
-
-        moving_sum = random_ints.clone().detach()
-        moving_sum[:, self.k - 1 :] = convolution
->>>>>>> b1a63ff589841a918116d56b0c784610d3cf117b
         samples = (
             torch.cat(
                 [
                     random_ints,
                     self.sep * torch.ones(size=(num_samples, 1)).to(self.device),
-                    torch.remainder(input=moving_sum, other=self.p),
+                    torch.remainder(input=convolution, other=self.p),
                 ],
                 axis=-1,
             )
             .to(int)
             .detach()
         )
-<<<<<<< HEAD
-=======
 
->>>>>>> b1a63ff589841a918116d56b0c784610d3cf117b
         return samples

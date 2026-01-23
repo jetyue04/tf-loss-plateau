@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from .base_data import BaseDataTask
 
-class MovingWindowSum(BaseDataTask):
+class MovingWindowDifference(BaseDataTask):
     def __init__(self, config, device="cuda"):
         super().__init__(config, device)
         self.min_num = getattr(config, "min_num", 1)
@@ -19,41 +19,28 @@ class MovingWindowSum(BaseDataTask):
         ).to(self.device)
 
         random_ints_np = random_ints.detach().cpu().numpy()
-        convolution = torch.stack(
-            [
-                torch.from_numpy(
-                    np.convolve(
-                        random_ints_np[i],
-                        np.ones(self.k),
-                        mode="valid",
-                    )
-                )
-                for i in range(random_ints.shape[0])
-            ]
-        )
-<<<<<<< HEAD
-        moving_sum = random_ints.clone().detach()
-        moving_sum[:, self.k - 1 :] = convolution
 
-=======
+        moving_difference = random_ints.clone().detach()
+        moving_difference = random_ints.clone()
 
-        moving_sum = random_ints.clone().detach()
-        moving_sum[:, self.k - 1 :] = convolution
->>>>>>> b1a63ff589841a918116d56b0c784610d3cf117b
+        for j in range(self.k - 1, num_tokens):
+            window = random_ints[:, j - self.k + 1 : j + 1]  # shape (num_samples, k)
+            d = window[:, 0]
+            for t in range(1, self.k):
+                d = d - window[:, t]  # subtract all other elements in the window
+            moving_difference[:, j] = d
+
         samples = (
             torch.cat(
                 [
                     random_ints,
                     self.sep * torch.ones(size=(num_samples, 1)).to(self.device),
-                    torch.remainder(input=moving_sum, other=self.p),
+                    torch.remainder(input=moving_difference, other=self.p),
                 ],
                 axis=-1,
             )
             .to(int)
             .detach()
         )
-<<<<<<< HEAD
-=======
 
->>>>>>> b1a63ff589841a918116d56b0c784610d3cf117b
         return samples

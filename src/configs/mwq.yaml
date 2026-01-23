@@ -2,16 +2,16 @@ model:
   n_layer: 1
   n_head: 1
   n_embd: 256
-  linear: False
+  linear: True
 
 data:
   tasks:
-    - name: 'MovingWindowProduct'
+    - name: 'MovingWindowQuotient'
       sep: 17
-      n_train: 64
+      n_train: 128
       n_test: 32
       min_num: 1
-      max_num: 16
+      max_num: 16 
       k: 2
       p: 17
   min_num: 1
@@ -31,7 +31,7 @@ train:
   num_steps: 500
   norm_type: "none_rank"
   wandb: True
-  wandb_run_name: 'mwp_linear_embeddingNotFrozen'
+  wandb_run_name: 'mwq_linear_embeedingNotFrozen'
   wandb_project: 'loss_plateau_tf'
   save_ckpt: False
   ckpt_freq: 20

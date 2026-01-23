@@ -15,8 +15,7 @@ import wandb
 import sys
 sys.path.append("./src")  # make sure Python can find src/
 import data
-from model_linear import GPTLinear
-from model_softmax import GPTSoftmax
+from model import GPTLinear, GPTSoftmax
 from multi_task_train import train_step
 
 
