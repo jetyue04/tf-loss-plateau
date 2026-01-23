@@ -8,7 +8,7 @@ data:
   tasks:
     - name: 'MovingWindowSum'
       sep: 17
-      n_train: 128
+      n_train: 64
       n_test: 32
       min_num: 1
       max_num: 16
