@@ -113,30 +113,24 @@ def train_step(
     config,
     device,
 ):
-    n_train, n_test, num_tokens = (
-        config.data.n_train,
-        config.data.n_test,
-        config.data.num_tokens,
-    )
+    num_tokens = config.data.num_tokens
 
     # --- MIXED BATCH SAMPLING ---
-    # task_names = list(data_samplers.keys())
-    n_tasks = len(data_samplers)
-
-    n_train_each = n_train // n_tasks
-    n_test_each = n_test // n_tasks
-
     mixed_train = {}
     mixed_test = {}
 
     ## Generate data for each task
-    for name, sampler in data_samplers.items():
+    for name, task_info in data_samplers.items():
+        sampler = task_info["sampler"]
+        n_train = task_info["n_train"]
+        n_test = task_info["n_test"]
+
         data = sampler.sample(
-            num_samples=n_train_each + n_test_each,
+            num_samples=n_train + n_test,
             num_tokens=num_tokens,
         )
-        train_part = data[:n_train_each, :]
-        test_part = data[n_train_each:, :]
+        train_part = data[:n_train, :]
+        test_part = data[n_train:, :]
         mixed_train[name] = train_part
         mixed_test[name] = test_part
 
@@ -163,7 +157,7 @@ def train_step(
     _, _, _, loss = model(
         train_data[:, :-1], 
         targets=train_data[:, 1:], 
-        prompt_len =prompt_len, 
+        prompt_len=prompt_len, 
         mask_input=config.train.mask_input,
     )
     loss.backward()
@@ -176,28 +170,28 @@ def train_step(
     model.eval()
     with torch.no_grad():
         ### Per task metrics
-        examples_seen_per_task = n_train_each * (step + 1)
+        examples_seen_per_task = {name: task_info["n_train"] * (step + 1) for name, task_info in data_samplers.items()}
         per_task_metrics = {}
-        for task_name in mixed_train.keys():
+        for task_name, task_info in data_samplers.items():
             t_train = mixed_train[task_name]
             t_test = mixed_test[task_name]
             # Calculate metrics for this task
             metrics = calc_metric(
-            t_train,
-            t_test,
-            model,
-            prompt_len,
-            gen_len,
-            acc_start,
-            device,
-            k=data_samplers[task_name].k,
-        )
+                t_train,
+                t_test,
+                model,
+                prompt_len,
+                gen_len,
+                acc_start,
+                device,
+                k=task_info["sampler"].k,
+            )
             per_task_metrics[task_name] = metrics
 
             if config.train.wandb:
                 # Log everything for this task
                 log_dict = {
-                    f"{task_name}/examples_seen": examples_seen_per_task,
+                    f"{task_name}/examples_seen": examples_seen_per_task[task_name],
                     **{f"{task_name}/{k}": v for k, v in metrics.items() if k not in ["cosine_sim_fig", "attn_head_figs"]}
                 }
                 wandb.log(log_dict, step=step)
@@ -227,14 +221,14 @@ def train_step(
         )
 
         plt.close()
-        # del (
-        #     logit_fig,
-        #     ax_cs,
-        #     logit_cs,
-        #     ax_head,
-        #     fig_head
+        del (
+            logit_fig,
+            ax_cs,
+            logit_cs,
+            ax_head,
+            fig_head
 
-        # )
+        )
 
         if config.train.save_ckpt:
             if (step == 0) or ((step + 1) % config.train.ckpt_freq == 0):
