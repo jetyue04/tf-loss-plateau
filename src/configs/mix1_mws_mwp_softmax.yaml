@@ -1,19 +1,19 @@
 model:
   n_layer: 1
-  n_head: 2
+  n_head: 1
   n_embd: 256
-  linear: True
+  linear: False
 
 data:
   tasks:
-    - name: 'MovingWindowSum'
-      sep: 17
-      n_train: 128
-      n_test: 32
     - name: 'MovingWindowProduct'
-      sep: 0
-      n_train: 128
+      sep: 17
+      n_train: 64
       n_test: 32
+      min_num: 1
+      max_num: 16
+      k: 2
+      p: 17
   min_num: 1
   max_num: 16
   k: 2 # Window size
@@ -28,13 +28,13 @@ data:
 train:
   lr: 0.0001
   grad_clip: -1
-  num_steps: 1000
+  num_steps: 500
   norm_type: "none_rank"
   wandb: True
-  wandb_run_name: 'mix_mws_mwp_linear_2head'
+  wandb_run_name: 'mwp_linear_embeddingNotFrozen'
   wandb_project: 'loss_plateau_tf'
   save_ckpt: False
   ckpt_freq: 20
   seed: 67
-  mask_input: False # If we are masking the loss on the input sequence
-  freeze_embedding: False
+  mask_input: True # If we are masking the loss on the input sequence
+  freeze_embedding: false

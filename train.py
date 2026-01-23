@@ -15,8 +15,7 @@ import wandb
 import sys
 sys.path.append("./src")  # make sure Python can find src/
 import data
-from model_linear import GPTLinear
-from model_softmax import GPTSoftmax
+from model import GPTLinear, GPTSoftmax
 from multi_task_train import train_step
 
 
@@ -45,10 +44,14 @@ def prepare_data_samplers(config, device):
     """Create a dict of data samplers for each task."""
     num_task = len(config.data.tasks)
     data_samplers = {}
-    for i in range(num_task):
-        task = config.data.tasks[i]
-        task_class = getattr(data, task.name)
-        data_samplers[task.name] = task_class(task, device)
+    for task_config in config.data.tasks:
+        task_name = task_config.name
+        task_class = getattr(data, task_name)
+        data_samplers[task_name] = {
+            "sampler": task_class(task_config, device),
+            "n_train": task_config.n_train,
+            "n_test": task_config.n_test,
+        }
     return data_samplers
 
 
