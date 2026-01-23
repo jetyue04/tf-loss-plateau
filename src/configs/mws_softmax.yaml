@@ -8,8 +8,12 @@ data:
   tasks:
     - name: 'MovingWindowSum'
       sep: 17
-      n_train: 256
-      n_test: 64
+      n_train: 128 # Not sure if this is relevant
+      n_test: 32 #Don't thiink this is relevant
+      min_num: 1
+      max_num: 16
+      k: 2
+      p: 17
   min_num: 1
   max_num: 16
   k: 2 # Window size
@@ -24,13 +28,13 @@ data:
 train:
   lr: 0.0001
   grad_clip: -1
-  num_steps: 1000
+  num_steps: 500
   norm_type: "none_rank"
   wandb: True
-  wandb_run_name: 'mws_softmax_embeddingFrozen'
+  wandb_run_name: 'mwp_linear_embeddingNotFrozen'
   wandb_project: 'loss_plateau_tf'
   save_ckpt: False
   ckpt_freq: 20
   seed: 67
-  mask_input: False # If we are masking the loss on the input sequence
-  freeze_embedding: True
+  mask_input: True # If we are masking the loss on the input sequence
+  freeze_embedding: false

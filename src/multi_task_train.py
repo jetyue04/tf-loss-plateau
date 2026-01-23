@@ -221,14 +221,14 @@ def train_step(
         )
 
         plt.close()
-        del (
-            logit_fig,
-            ax_cs,
-            logit_cs,
-            ax_head,
-            fig_head
+        # del (
+        #     logit_fig,
+        #     ax_cs,
+        #     logit_cs,
+        #     ax_head,
+        #     fig_head
 
-        )
+        # )
 
         if config.train.save_ckpt:
             if (step == 0) or ((step + 1) % config.train.ckpt_freq == 0):

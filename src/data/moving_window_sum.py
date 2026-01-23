@@ -34,4 +34,17 @@ class MovingWindowSum(BaseDataTask):
 
         moving_sum = random_ints.clone().detach()
         moving_sum[:, self.k - 1 :] = convolution
-        return moving_sum
+        samples = (
+            torch.cat(
+                [
+                    random_ints,
+                    self.sep * torch.ones(size=(num_samples, 1)).to(self.device),
+                    torch.remainder(input=moving_sum, other=self.p),
+                ],
+                axis=-1,
+            )
+            .to(int)
+            .detach()
+        )
+
+        return samples
