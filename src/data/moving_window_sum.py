@@ -31,15 +31,9 @@ class MovingWindowSum(BaseDataTask):
                 for i in range(random_ints.shape[0])
             ]
         )
-<<<<<<< HEAD
         moving_sum = random_ints.clone().detach()
         moving_sum[:, self.k - 1 :] = convolution
 
-=======
-
-        moving_sum = random_ints.clone().detach()
-        moving_sum[:, self.k - 1 :] = convolution
->>>>>>> b1a63ff589841a918116d56b0c784610d3cf117b
         samples = (
             torch.cat(
                 [
@@ -52,8 +46,4 @@ class MovingWindowSum(BaseDataTask):
             .to(int)
             .detach()
         )
-<<<<<<< HEAD
-=======
-
->>>>>>> b1a63ff589841a918116d56b0c784610d3cf117b
         return samples

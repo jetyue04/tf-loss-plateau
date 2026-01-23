@@ -1,20 +1,20 @@
 import torch
-import numpy as np
 from .base_data import BaseDataTask
+
 
 class MovingWindowQuotient(BaseDataTask):
     def __init__(self, config, device="cuda"):
         super().__init__(config, device)
-        self.min_num = getattr(config, "min_num", 1)
-        self.max_num = getattr(config, "max_num", 16)
-        self.k = getattr(config, "k", 2)
-        self.p = getattr(config, "p", 17)
-        self.sep = getattr(config, "sep", 17)
+        self.min_num = config.min_num
+        self.max_num = config.max_num
+        self.k = config.k
+        self.p = config.p
+        self.sep = config.sep
         assert self.p > self.max_num
 
     @torch.no_grad()
     def sample(self, num_samples, num_tokens):
-        # (B, T)
+        # Sample integers
         x = torch.randint(
             low=self.min_num,
             high=self.max_num + 1,
@@ -22,20 +22,28 @@ class MovingWindowQuotient(BaseDataTask):
             device=self.device,
         )
 
-        # Output container
-        out = torch.zeros_like(x)
+        # Outgoing / incoming terms
+        x_out = x[:, : num_tokens - self.k + 1]     # denominator
+        x_in  = x[:, self.k - 1 :]                   # numerator
 
-        # Outgoing and incoming elements
-        x_out = x[:, :-self.k]          # x_i
-        x_in  = x[:, self.k:]           # x_{i+k}
-
-        # Modular inverse of outgoing
+        # Modular inverse via Fermat
         x_out_inv = torch.pow(x_out, self.p - 2) % self.p
 
-        # Quotient
-        q = (x_in * x_out_inv) % self.p
+        # Modular quotient
+        q = (x_in * x_out_inv) % self.p              # (B, T - k + 1)
 
-        # Align like moving window ops
-        out[:, self.k:] = q
+        # Align into full-length tensor
+        q_full = torch.zeros_like(x)
+        q_full[:, self.k - 1 :] = q
 
-        return out
+        # Final concatenated sample
+        samples = torch.cat(
+            [
+                x,
+                self.sep * torch.ones((num_samples, 1), device=self.device),
+                q_full,
+            ],
+            dim=-1,
+        ).to(torch.int64)
+
+        return samples
