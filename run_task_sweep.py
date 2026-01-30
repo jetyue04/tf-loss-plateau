@@ -73,7 +73,7 @@ BASE_CONFIG = {
     "train": {
         "lr": 1e-4,
         "grad_clip": -1,
-        "num_steps": 1000,
+        "num_steps": 2,
         "norm_type": "none_rank",
         "wandb": True,
         "wandb_project": "loss_plateau_tf",
@@ -98,10 +98,15 @@ def all_task_subsets(tasks):
 # Main sweep logic
 # -------------------------------------------------------------------
 def main():
+    MAX_P = 17                  # base tokens
+    N_TOTAL_TASKS = len(ALL_TASKS)
+    FIXED_VOCAB_SIZE = MAX_P + N_TOTAL_TASKS  # enough for all separator tokens
+
     out_dir = Path("src/configs/generated")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     task_subsets = all_task_subsets(ALL_TASKS)
+    
 
     print(f"Launching {len(task_subsets)} runs...\n")
 
@@ -116,6 +121,7 @@ def main():
         run_name = f"mix_{task_names}"
 
         cfg["train"]["wandb_run_name"] = run_name
+        cfg["model"]["vocab_size"] = FIXED_VOCAB_SIZE
 
         cfg_path = out_dir / f"{run_name}.yaml"
         with open(cfg_path, "w") as f:
