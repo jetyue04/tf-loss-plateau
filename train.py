@@ -68,7 +68,14 @@ def main(args):
 
     # Model settings -- May needs tweaking
     n_tasks = len(config.data.tasks)
-    config.model.vocab_size = max(getattr(config.data, "p", 17), config.data.max_num) + n_tasks
+    
+    # if config does not specify vocab size, calculate dynamically
+    if not hasattr(config.model, "vocab_size") or config.model.vocab_size is None:
+        print("Calculating vocab size dynamically...")
+        max_sep = max(task.sep for task in config.data.tasks)
+        # config.model.vocab_size = max(getattr(config.data, "p", 17), config.data.max_num) + n_tasks
+        config.model.vocab_size = max(getattr(config.data, "p", 17), config.data.max_num, max_sep) + 1
+
     config.model.block_size = 2 * config.data.num_tokens + 1
 
     # Prepare data samplers
