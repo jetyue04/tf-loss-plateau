@@ -73,7 +73,7 @@ BASE_CONFIG = {
     "train": {
         "lr": 1e-4,
         "grad_clip": -1,
-        "num_steps": 2,
+        "num_steps": 1000,
         "norm_type": "none_rank",
         "wandb": True,
         "wandb_project": "loss_plateau_tf",
