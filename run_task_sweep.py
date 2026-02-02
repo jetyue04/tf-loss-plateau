@@ -71,7 +71,10 @@ BASE_CONFIG = {
         "ckpt_freq": 20,
         "seed": 67,
         "mask_input": True,
-        "freeze_embedding": True,
+        "freeze_embedding": False,
+        "stop_on_perfect_acc": True,
+        "perfect_acc_patience": 50,
+        "perfect_acc_eps": 1e-6,
     },
 }
 
@@ -129,7 +132,7 @@ def main():
         task_names = "_".join(
             t["name"].replace("MovingWindow", "") for t in subset
         )
-        run_name = f"mix_{task_names}"
+        run_name = f"mix_{task_names}_freezeEmbedding{cfg['train']['freeze_embedding']}"
 
         cfg["train"]["wandb_run_name"] = run_name
         cfg["model"]["vocab_size"] = FIXED_VOCAB_SIZE

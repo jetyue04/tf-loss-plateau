@@ -252,3 +252,4 @@ def train_step(
                     model_wandb.add_file(f"./mws_k2_l1_h1_a16_n16.tar")
                     wandb.log_artifact(model_wandb)
                     print("model uploaded to wandb")
+    return overall_metrics

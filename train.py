@@ -102,9 +102,15 @@ def main(args):
         wandb.init(project=config.train.wandb_project, name=wandb_run_name, config=config)
         wandb.watch(model)
 
+    stop_on_perfect = getattr(config.train, "stop_on_perfect_acc", False)
+    perfect_patience = getattr(config.train, "perfect_acc_patience", 50)
+    # acc_eps = getattr(config.train, "perfect_acc_eps", 1e-6)
+
+    perfect_counter = 0
+
     # Training loop
     for step in range(config.train.num_steps):
-        train_step(
+        overall_metrics = train_step(
             model=model,
             optim=optim,
             data_samplers=data_samplers,
@@ -112,6 +118,23 @@ def main(args):
             config=config,
             device=device,
         )
+        
+        ## Early stop
+        if stop_on_perfect:
+            acc = overall_metrics["test_acc"]  # or "train_acc" if you prefer
+
+            if acc >= 1.0:
+                perfect_counter += 1
+            else:
+                perfect_counter = 0
+
+            if perfect_counter >= perfect_patience:
+                print(
+                    f"\n✅ Early stopping at step {step}: "
+                    f"overall accuracy stayed at 100% for "
+                    f"{perfect_patience} consecutive steps\n"
+                )
+                break
 
     if getattr(config.train, "wandb", False):
         wandb.finish()
