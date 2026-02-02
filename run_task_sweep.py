@@ -38,20 +38,10 @@ ALL_TASKS = [
         k=2,
         p=17,
     ),
-    # dict(
-    #     name="MovingWindowQuotient",
-    #     sep=20,
-    #     n_train=128,
-    #     n_test=32,
-    #     min_num=1,
-    #     max_num=16,
-    #     k=2,
-    #     p=17,
-    # ),
 ]
 
 # -------------------------------------------------------------------
-# Base config template (shared across all runs)
+# Base config template
 # -------------------------------------------------------------------
 BASE_CONFIG = {
     "model": {
@@ -61,7 +51,7 @@ BASE_CONFIG = {
         "linear": True,
     },
     "data": {
-        "tasks": [],   # filled dynamically
+        "tasks": [],
         "min_num": 1,
         "max_num": 16,
         "k": 2,
@@ -98,21 +88,42 @@ def all_task_subsets(tasks):
 # Main sweep logic
 # -------------------------------------------------------------------
 def main():
-    MAX_P = 17                  # base tokens
+    TOTAL_TRAIN_EXAMPLES = 128   # total across all tasks
+    TOTAL_TEST_EXAMPLES = 32     # total across all tasks
+    MAX_P = 17
     N_TOTAL_TASKS = len(ALL_TASKS)
-    FIXED_VOCAB_SIZE = MAX_P + N_TOTAL_TASKS  # enough for all separator tokens
+    FIXED_VOCAB_SIZE = MAX_P + N_TOTAL_TASKS
 
     out_dir = Path("src/configs/generated")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     task_subsets = all_task_subsets(ALL_TASKS)
     
-
     print(f"Launching {len(task_subsets)} runs...\n")
 
     for subset in task_subsets:
         cfg = copy.deepcopy(BASE_CONFIG)
-        cfg["data"]["tasks"] = list(subset)
+        n_tasks = len(subset)
+
+        # Evenly split train/test across tasks
+        per_task_train = TOTAL_TRAIN_EXAMPLES // n_tasks
+        per_task_test = TOTAL_TEST_EXAMPLES // n_tasks
+
+        # Assign remainder to last task if not divisible
+        train_remainder = TOTAL_TRAIN_EXAMPLES - per_task_train * n_tasks
+        test_remainder = TOTAL_TEST_EXAMPLES - per_task_test * n_tasks
+
+        tasks = []
+        for i, t in enumerate(subset):
+            t_copy = copy.deepcopy(t)
+            t_copy["n_train"] = per_task_train
+            t_copy["n_test"] = per_task_test
+            if i == n_tasks - 1:
+                t_copy["n_train"] += train_remainder
+                t_copy["n_test"] += test_remainder
+            tasks.append(t_copy)
+
+        cfg["data"]["tasks"] = tasks
 
         # Clean, readable run name
         task_names = "_".join(
@@ -134,7 +145,6 @@ def main():
         )
 
     print("\n✅ Sweep complete.")
-
 
 if __name__ == "__main__":
     main()
