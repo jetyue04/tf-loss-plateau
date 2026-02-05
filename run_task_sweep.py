@@ -92,7 +92,7 @@ def all_task_subsets(tasks):
 # -------------------------------------------------------------------
 def main():
     TOTAL_TRAIN_EXAMPLES = 128   # total across all tasks
-    TOTAL_TEST_EXAMPLES = 32     # total across all tasks
+    TOTAL_TEST_EXAMPLES = 64     # total across all tasks
     MAX_P = 17
     N_TOTAL_TASKS = len(ALL_TASKS)
     FIXED_VOCAB_SIZE = MAX_P + N_TOTAL_TASKS
