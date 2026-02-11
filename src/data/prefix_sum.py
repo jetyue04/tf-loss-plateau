@@ -12,6 +12,7 @@ class PrefixSum(BaseDataTask):
         self.p = getattr(config, "p", 17)
         self.sep = getattr(config, "sep", 17)
         assert self.p > self.max_num
+        
     @torch.no_grad()
     def sample(self, num_samples, num_tokens):
         if self.no_repeat:
