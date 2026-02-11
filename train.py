@@ -99,8 +99,11 @@ def main(args):
     if getattr(config.train, "wandb", False):
         wandb_run_name = getattr(config.train, "wandb_run_name", None)
         wandb.login(key="")
-        wandb.init(project=config.train.wandb_project, name=wandb_run_name, config=config)
-        wandb.watch(model)
+        wandb.init(project=config.train.wandb_project, name=wandb_run_name, config=config, save_code=False)
+        if getattr(config.train, "wandb_save_model", False):
+            wandb.watch(model, log="parameters")  # save model parameters
+        else:   
+            wandb.watch(model, log=None)        # metrics only, no model saved
 
     stop_on_perfect = getattr(config.train, "stop_on_perfect_acc", False)
     perfect_patience = getattr(config.train, "perfect_acc_patience", 50)
