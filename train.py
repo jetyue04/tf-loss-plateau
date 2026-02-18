@@ -45,8 +45,9 @@ def prepare_data_samplers(config, device):
     num_task = len(config.data.tasks)
     data_samplers = {}
     for task_config in config.data.tasks:
-        task_name = task_config.name
-        task_class = getattr(data, task_name)
+        task_name = task_config.name        # unique identifier
+        task_class_name = task_config.task  # the actual class to instantiate
+        task_class = getattr(data, task_class_name)
         data_samplers[task_name] = {
             "sampler": task_class(task_config, device),
             "n_train": task_config.n_train,
