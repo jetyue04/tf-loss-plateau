@@ -49,10 +49,16 @@ def calc_metric(t_train, t_test, model, prompt_len, gen_len, acc_start, device, 
     # --- Attention progress measure ---
     if k:
         attn_map_output_seq = attn_map[:, :, acc_start-1:]
+        attn_map_output_seq[:, :, :, acc_start-1] = 0
         att_mask = torch.zeros_like(attn_map_output_seq, device=device)
         att_mask[:, :, 0, 0] = 1
-        for i in range(gen_len-1):
-            att_mask[:, :, i+1, i:i+k] = 1
+        # Progressive windows for remaining queries
+        for i in range(1, gen_len):
+            start_idx = max(0, i - k + 1)
+            end_idx = i + 1
+            att_mask[:, :, i, start_idx:end_idx] = 1
+        # for i in range(gen_len-1):
+        #     att_mask[:, :, i+1, i:i+k] = 1
 
         att_prog_measure = torch.mean(
             torch.sum(torch.abs(attn_map_output_seq) * att_mask, dim=(-3, -2, -1)) /
