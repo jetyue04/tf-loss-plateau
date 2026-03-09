@@ -3,13 +3,14 @@ model:
   n_head: 1
   n_embd: 256
   linear: True
+  vocab_size: 20
 
 data:
   tasks:
     - name: 'MovingWindowSum'
       sep: 17
       n_train: 128
-      n_test: 32
+      n_test: 64
       min_num: 1
       max_num: 16 
       k: 2
@@ -28,7 +29,7 @@ data:
 train:
   lr: 0.0001
   grad_clip: -1
-  num_steps: 500
+  num_steps: 1000
   norm_type: "none_rank"
   wandb: True
   wandb_run_name: 'mws_linear_embeddingNotFrozen'

@@ -3,6 +3,7 @@ model:
   n_head: 1
   n_embd: 256
   linear: True
+  vocab_size: 20
 
 data:
   tasks:
@@ -16,7 +17,7 @@ data:
       p: 17
     - name: 'MovingWindowProduct'
       sep: 18
-      n_train: 128
+      n_train: 64
       n_test: 32
       min_num: 1
       max_num: 16
@@ -36,13 +37,13 @@ data:
 train:
   lr: 0.0001 
   grad_clip: -1
-  num_steps: 500
+  num_steps: 1000
   norm_type: "none_rank"
   wandb: True
-  wandb_run_name: 'mix_mwsk2_mwpk2_linear_embeddingFrozen_inputsMasked'
+  wandb_run_name: 'mix_mws_mwp_embeddingNotFrozen'
   wandb_project: 'loss_plateau_tf'
   save_ckpt: False
   ckpt_freq: 20
   seed: 67
   mask_input: true # If we are masking the loss on the input sequence
-  freeze_embedding: true
+  freeze_embedding: false

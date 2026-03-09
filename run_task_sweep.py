@@ -11,28 +11,28 @@ ALL_TASKS = [
     dict(
         name="MovingWindowSum",
         sep=17,
-        n_train=128,
-        n_test=32,
+        # n_train=128,
+        # n_test=32,
         min_num=1,
         max_num=16,
-        k=2,
+        k=4,
         p=17,
     ),
     dict(
         name="MovingWindowDifference",
         sep=18,
-        n_train=128,
-        n_test=32,
+        # n_train=128,
+        # n_test=32,
         min_num=1,
         max_num=16,
-        k=2,
+        k=3,
         p=17,
     ),
     dict(
         name="MovingWindowProduct",
         sep=19,
-        n_train=128,
-        n_test=32,
+        # n_train=128,
+        # n_test=32,
         min_num=1,
         max_num=16,
         k=2,
@@ -54,7 +54,6 @@ BASE_CONFIG = {
         "tasks": [],
         "min_num": 1,
         "max_num": 16,
-        "k": 2,
         "p": 17,
         "num_tokens": 16,
         "fixed_len": True,
@@ -63,10 +62,11 @@ BASE_CONFIG = {
     "train": {
         "lr": 1e-4,
         "grad_clip": -1,
-        "num_steps": 1000,
+        "num_steps": 30000,
         "norm_type": "none_rank",
         "wandb": True,
         "wandb_project": "loss_plateau_tf",
+        "wandb_save_model": False,
         "save_ckpt": False,
         "ckpt_freq": 20,
         "seed": 67,
@@ -91,7 +91,7 @@ def all_task_subsets(tasks):
 # Main sweep logic
 # -------------------------------------------------------------------
 def main():
-    TOTAL_TRAIN_EXAMPLES = 128   # total across all tasks
+    TOTAL_TRAIN_EXAMPLES = 256   # total across all tasks
     TOTAL_TEST_EXAMPLES = 64     # total across all tasks
     MAX_P = 17
     N_TOTAL_TASKS = len(ALL_TASKS)
@@ -130,9 +130,13 @@ def main():
 
         # Clean, readable run name
         task_names = "_".join(
-            t["name"].replace("MovingWindow", "") for t in subset
+            f"{t['name'].replace('MovingWindow','')}{t['k']}"
+            for t in subset
         )
-        run_name = f"mix_{task_names}_freezeEmbedding{cfg['train']['freeze_embedding']}"
+        run_name = (
+            f"mix_{task_names}"
+            f"_steps{cfg['train']['num_steps'] // 1000}k"
+        )
 
         cfg["train"]["wandb_run_name"] = run_name
         cfg["model"]["vocab_size"] = FIXED_VOCAB_SIZE
