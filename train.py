@@ -1,4 +1,5 @@
 import math
+import os
 import random
 import yaml
 import argparse
@@ -79,6 +80,13 @@ def main(args):
 
     config.model.block_size = 2 * config.data.num_tokens + 1
 
+    # Create checkpoint directory if needed
+    if getattr(config.train, "save_ckpt", False):
+        ckpt_path = getattr(config.train, "ckpt_path", "./checkpoint.tar")
+        ckpt_dir = os.path.dirname(ckpt_path)
+        if ckpt_dir:
+            os.makedirs(ckpt_dir, exist_ok=True)
+
     # Prepare data samplers
     data_samplers = prepare_data_samplers(config, device)
 
@@ -101,10 +109,8 @@ def main(args):
         wandb_run_name = getattr(config.train, "wandb_run_name", None)
         wandb.login(key="")
         wandb.init(project=config.train.wandb_project, name=wandb_run_name, config=config, save_code=False)
-        if getattr(config.train, "wandb_save_model", False):
-            wandb.watch(model, log="parameters")  # save model parameters
-        else:   
-            wandb.watch(model, log=None)        # metrics only, no model saved
+        watch_log_freq = getattr(config.train, "watch_log_freq", 10)
+        wandb.watch(model, log="all", log_freq=watch_log_freq)
 
     stop_on_perfect = getattr(config.train, "stop_on_perfect_acc", False)
     perfect_patience = getattr(config.train, "perfect_acc_patience", 50)

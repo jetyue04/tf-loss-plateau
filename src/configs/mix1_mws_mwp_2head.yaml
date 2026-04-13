@@ -43,6 +43,7 @@ train:
   wandb_project: 'loss_plateau_tf'
   save_ckpt: False
   ckpt_freq: 20
+  ckpt_path: './ckpts/mix_mwsk2_mwpk2_linear_2head_embeddingNotFrozen_inputsMasked.tar'
   seed: 67
   mask_input: true # If we are masking the loss on the input sequence
   freeze_embedding: False

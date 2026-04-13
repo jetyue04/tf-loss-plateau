@@ -1,0 +1,54 @@
+model:
+  n_layer: 1
+  n_head: 1
+  n_embd: 256
+  linear: True
+  vocab_size: null  # calculated dynamically from tasks
+
+data:
+  tasks:
+    - name: 'MovingWindowSum'
+      task: 'MovingWindowSum'
+      sep: 17
+      n_train: 64
+      n_test: 32
+      min_num: 1
+      max_num: 16
+      k: 2
+      p: 17
+    - name: 'MovingWindowProduct'
+      task: 'MovingWindowProduct'
+      sep: 18
+      n_train: 64
+      n_test: 32
+      min_num: 1
+      max_num: 16
+      k: 2
+      p: 17
+  max_num: 16
+  num_tokens: 16
+  mix: 'random'
+
+transfer:
+  phase1_tasks: ['MovingWindowSum']    # task names to train on in phase 1
+  phase2_tasks: ['MovingWindowProduct'] # task names to fine-tune on in phase 2
+  freeze_embeddings_phase2: false       # freeze token/pos embeddings during phase 2
+  compare_weights: true                 # run layer-wise weight diff after both phases
+
+train:
+  lr: 0.0001
+  grad_clip: -1
+  num_steps: 1000
+  mask_input: true
+  freeze_embedding: false
+  stop_on_perfect_acc: true
+  perfect_acc_patience: 50
+  wandb: true
+  wandb_run_name: 'MWS_to_MWP_transfer'
+  wandb_project: 'loss_plateau_tf'
+  watch_log_freq: 10
+  save_ckpt: true
+  ckpt_freq: 20
+  ckpt_path_phase1: './ckpts/transfer_after_phase1.tar'
+  ckpt_path_phase2: './ckpts/transfer_after_phase2.tar'
+  seed: 67
