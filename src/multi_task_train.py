@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 from torch.nn.functional import cosine_similarity
@@ -251,7 +252,10 @@ def train_step(
 
         if config.train.save_ckpt:
             if (step == 0) or ((step + 1) % config.train.ckpt_freq == 0):
-                ckpt_path = config.train.get("ckpt_path", "./checkpoint.tar")
+                base_path = config.train.get("ckpt_path", "./checkpoint.tar")
+                base, ext = os.path.splitext(base_path)
+                ckpt_path = f"{base}_step{step:05d}{ext}"
+                os.makedirs(os.path.dirname(ckpt_path) or ".", exist_ok=True)
                 model.train()
                 torch.save(
                     {

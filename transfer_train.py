@@ -101,13 +101,15 @@ def run_phase(
         )
 
         if config.train.save_ckpt and ((global_step + 1) % config.train.ckpt_freq == 0):
+            base, ext = os.path.splitext(ckpt_path)
+            step_ckpt_path = f"{base}_step{global_step:05d}{ext}"
             save_checkpoint(
-                model, optim, global_step, ckpt_path,
+                model, optim, global_step, step_ckpt_path,
                 extra={"phase": phase_name, "test_acc": overall_metrics["test_acc"]},
             )
             if config.train.wandb:
                 artifact = wandb.Artifact(f"{phase_name}_step{global_step}", type="model")
-                artifact.add_file(ckpt_path)
+                artifact.add_file(step_ckpt_path)
                 wandb.log_artifact(artifact)
 
         global_step += 1
@@ -125,13 +127,15 @@ def run_phase(
                 break
 
     # Always save a final checkpoint at phase end
+    base, ext = os.path.splitext(ckpt_path)
+    final_ckpt_path = f"{base}_final{ext}"
     save_checkpoint(
-        model, optim, global_step - 1, ckpt_path,
+        model, optim, global_step - 1, final_ckpt_path,
         extra={"phase": phase_name, "test_acc": overall_metrics["test_acc"]},
     )
     if config.train.wandb:
         artifact = wandb.Artifact(f"{phase_name}_final", type="model")
-        artifact.add_file(ckpt_path)
+        artifact.add_file(final_ckpt_path)
         wandb.log_artifact(artifact)
 
     return global_step
@@ -252,10 +256,12 @@ def main(args):
     ckpt_phase1 = config.train.ckpt_path_phase1
     ckpt_phase2 = config.train.ckpt_path_phase2
 
-    # Phase 1 — skip if checkpoint already exists
-    if os.path.exists(ckpt_phase1):
-        print(f"\nPhase 1 checkpoint found at {ckpt_phase1}, loading and skipping phase 1.\n")
-        ckpt = torch.load(ckpt_phase1, map_location=device)
+    # Phase 1 — skip if final checkpoint already exists
+    base, ext = os.path.splitext(ckpt_phase1)
+    ckpt_phase1_final = f"{base}_final{ext}"
+    if os.path.exists(ckpt_phase1_final):
+        print(f"\nPhase 1 final checkpoint found at {ckpt_phase1_final}, loading and skipping phase 1.\n")
+        ckpt = torch.load(ckpt_phase1_final, map_location=device)
         model.load_state_dict(ckpt["model"])
         optim.load_state_dict(ckpt["optim"])
         global_step = ckpt["step"] + 1
@@ -295,7 +301,9 @@ def main(args):
 
     # Weight comparison
     if config.transfer.get("compare_weights", True):
-        compare_checkpoints(ckpt_phase1, ckpt_phase2, wandb_enabled=config.train.wandb)
+        base2, ext2 = os.path.splitext(ckpt_phase2)
+        ckpt_phase2_final = f"{base2}_final{ext2}"
+        compare_checkpoints(ckpt_phase1_final, ckpt_phase2_final, wandb_enabled=config.train.wandb)
 
     if config.train.wandb:
         wandb.finish()
