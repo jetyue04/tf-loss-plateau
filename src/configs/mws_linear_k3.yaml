@@ -27,7 +27,7 @@ train:
   freeze_embedding: false
   save_ckpt: true
   ckpt_freq: 20
-  ckpt_path: './ckpts/mws_linear_k3_2heads.tar'
+  ckpt_path: './ckpts/mws_linear_k3_2heads/checkpoint.tar'
   seed: 67
   stop_on_perfect_acc: true
   perfect_acc_patience: 50

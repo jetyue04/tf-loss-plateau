@@ -29,7 +29,7 @@ train:
   wandb_project: 'loss_plateau_tf'
   save_ckpt: True
   ckpt_freq: 20
-  ckpt_path: './ckpts/mwd_linear_embeddingNotFrozen.tar'
+  ckpt_path: './ckpts/mwd_linear_embeddingNotFrozen/checkpoint.tar'
   seed: 67
   mask_input: True
   freeze_embedding: false
