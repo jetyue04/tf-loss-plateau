@@ -215,7 +215,7 @@ def main(args):
     # Vocab / block size
     if not config.model.get("vocab_size", None):
         max_sep = max(t.sep for t in config.data.tasks)
-        config.model.vocab_size = max(getattr(config.data, "p", 17), config.data.max_num, max_sep) + 1
+        config.model.vocab_size = max(config.data.get("p", 17), config.data.get("max_num", 16), max_sep) + 1
     config.model.block_size = 2 * config.data.num_tokens + 1
 
     # Model
