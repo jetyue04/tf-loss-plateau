@@ -25,7 +25,7 @@ train:
   num_steps: 5000
   mask_input: true
   freeze_embedding: false
-  save_ckpt: false
+  save_ckpt: true
   ckpt_freq: 20
   ckpt_path: './ckpts/mws_linear_k3_2heads.tar'
   seed: 67

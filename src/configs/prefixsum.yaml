@@ -26,7 +26,7 @@ train:
   watch_log_freq: 10
   wandb_run_name: 'prefixsum_linear_embeddingNotFrozen'
   wandb_project: 'loss_plateau_tf'
-  save_ckpt: False
+  save_ckpt: True
   ckpt_freq: 20
   ckpt_path: './ckpts/prefixsum_linear_embeddingNotFrozen.tar'
   seed: 67
