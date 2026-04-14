@@ -82,8 +82,8 @@ def run_phase(
     ckpt_path: str,
 ) -> int:
     """Run one training phase. Returns the global step after the phase ends."""
-    stop_on_perfect = getattr(config.train, "stop_on_perfect_acc", False)
-    patience = getattr(config.train, "perfect_acc_patience", 50)
+    stop_on_perfect = config.train.get("stop_on_perfect_acc", False)
+    patience = config.train.get("perfect_acc_patience", 50)
     perfect_counter = 0
 
     print(f"\n{'='*60}")
@@ -210,10 +210,10 @@ def compare_checkpoints(path1: str, path2: str, wandb_enabled: bool = False):
 def main(args):
     config = load_config(args.config)
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    set_seed(getattr(config.train, "seed", 42))
+    set_seed(config.train.get("seed", 42))
 
     # Vocab / block size
-    if not getattr(config.model, "vocab_size", None):
+    if not config.model.get("vocab_size", None):
         max_sep = max(t.sep for t in config.data.tasks)
         config.model.vocab_size = max(getattr(config.data, "p", 17), config.data.max_num, max_sep) + 1
     config.model.block_size = 2 * config.data.num_tokens + 1
@@ -239,7 +239,7 @@ def main(args):
             config=config.toDict(),
             save_code=False,
         )
-        watch_log_freq = getattr(config.train, "watch_log_freq", 10)
+        watch_log_freq = config.train.get("watch_log_freq", 10)
         wandb.watch(model, log="all", log_freq=watch_log_freq)
 
     # Data samplers
@@ -265,7 +265,7 @@ def main(args):
     )
 
     # Optionally freeze embeddings for phase 2
-    if getattr(config.transfer, "freeze_embeddings_phase2", False):
+    if config.transfer.get("freeze_embeddings_phase2", False):
         for param in model.transformer.wte.parameters():
             param.requires_grad = False
         for param in model.transformer.wpe.parameters():
@@ -287,7 +287,7 @@ def main(args):
     )
 
     # Weight comparison
-    if getattr(config.transfer, "compare_weights", True):
+    if config.transfer.get("compare_weights", True):
         compare_checkpoints(ckpt_phase1, ckpt_phase2, wandb_enabled=config.train.wandb)
 
     if config.train.wandb:

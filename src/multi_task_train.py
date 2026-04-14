@@ -251,7 +251,7 @@ def train_step(
 
         if config.train.save_ckpt:
             if (step == 0) or ((step + 1) % config.train.ckpt_freq == 0):
-                ckpt_path = getattr(config.train, "ckpt_path", "./checkpoint.tar")
+                ckpt_path = config.train.get("ckpt_path", "./checkpoint.tar")
                 model.train()
                 torch.save(
                     {
