@@ -83,7 +83,7 @@ def run_phase(
 ) -> int:
     """Run one training phase. Returns the global step after the phase ends."""
     stop_on_perfect = config.train.get("stop_on_perfect_acc", False)
-    patience = config.train.get("perfect_acc_patience", 50)
+    patience = config.train.get("perfect_acc_patience", 25)
     perfect_counter = 0
 
     print(f"\n{'='*60}")

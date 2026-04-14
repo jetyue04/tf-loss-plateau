@@ -113,7 +113,7 @@ def main(args):
         wandb.watch(model, log="all", log_freq=watch_log_freq)
 
     stop_on_perfect = config.train.get("stop_on_perfect_acc", False)
-    perfect_patience = config.train.get("perfect_acc_patience", 50)
+    perfect_patience = config.train.get("perfect_acc_patience", 25)
     # acc_eps = config.train.get("perfect_acc_eps", 1e-6)
 
     perfect_counter = 0
