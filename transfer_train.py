@@ -95,7 +95,7 @@ def run_phase(
             model=model,
             optim=optim,
             data_samplers=data_samplers,
-            step=global_step,
+            step=step,
             config=config,
             device=device,
         )
