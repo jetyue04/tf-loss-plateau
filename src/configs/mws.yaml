@@ -8,29 +8,21 @@ model:
 data:
   tasks:
     - name: 'MovingWindowSum'
+      task: 'MovingWindowSum'
       sep: 17
       n_train: 128
       n_test: 64
       min_num: 1
-      max_num: 16 
+      max_num: 16
       k: 2
       p: 17
-  min_num: 1
-  max_num: 16
-  k: 2 # Window size
-  p: 17 # Mod p - Dicates Vocab Size
-  cot: False # No idea what this is - can delete
   num_tokens: 16
-  n_train: 256
-  n_test: 64
-  fixed_len: True
   mix: 'random'
 
 train:
   lr: 0.0001
   grad_clip: -1
   num_steps: 1000
-  norm_type: "none_rank"
   wandb: True
   wandb_run_name: 'mws_linear_embeddingNotFrozen'
   wandb_project: 'loss_plateau_tf'
@@ -38,5 +30,5 @@ train:
   ckpt_freq: 20
   ckpt_path: './ckpts/mws_linear_embeddingNotFrozen.tar'
   seed: 67
-  mask_input: True # If we are masking the loss on the input sequence
+  mask_input: True
   freeze_embedding: false

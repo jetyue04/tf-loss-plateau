@@ -49,6 +49,6 @@ train:
   watch_log_freq: 10
   save_ckpt: true
   ckpt_freq: 20
-  ckpt_path_phase1: './ckpts/transfer_after_phase1.tar'
-  ckpt_path_phase2: './ckpts/transfer_after_phase2.tar'
+  ckpt_path_phase1: './ckpts/transfer_mws_to_mwp_phase1.tar'
+  ckpt_path_phase2: './ckpts/transfer_mws_to_mwp_phase2.tar'
   seed: 67
