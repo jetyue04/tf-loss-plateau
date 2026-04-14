@@ -235,7 +235,7 @@ def main(args):
         wandb.login(key="")
         wandb.init(
             project=config.train.wandb_project,
-            name=getattr(config.train, "wandb_run_name", None),
+            name=config.train.get("wandb_run_name", None),
             config=config.toDict(),
             save_code=False,
         )
@@ -252,17 +252,24 @@ def main(args):
     ckpt_phase1 = config.train.ckpt_path_phase1
     ckpt_phase2 = config.train.ckpt_path_phase2
 
-    # Phase 1
-    global_step = run_phase(
-        phase_name="phase1",
-        model=model,
-        optim=optim,
-        data_samplers=phase1_samplers,
-        config=config,
-        device=device,
-        global_step=0,
-        ckpt_path=ckpt_phase1,
-    )
+    # Phase 1 — skip if checkpoint already exists
+    if os.path.exists(ckpt_phase1):
+        print(f"\nPhase 1 checkpoint found at {ckpt_phase1}, loading and skipping phase 1.\n")
+        ckpt = torch.load(ckpt_phase1, map_location=device)
+        model.load_state_dict(ckpt["model"])
+        optim.load_state_dict(ckpt["optim"])
+        global_step = ckpt["step"] + 1
+    else:
+        global_step = run_phase(
+            phase_name="phase1",
+            model=model,
+            optim=optim,
+            data_samplers=phase1_samplers,
+            config=config,
+            device=device,
+            global_step=0,
+            ckpt_path=ckpt_phase1,
+        )
 
     # Optionally freeze embeddings for phase 2
     if config.transfer.get("freeze_embeddings_phase2", False):
