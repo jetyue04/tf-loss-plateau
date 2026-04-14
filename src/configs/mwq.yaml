@@ -24,6 +24,7 @@ train:
   grad_clip: -1
   num_steps: 500
   wandb: True
+  watch_log_freq: 10
   wandb_run_name: 'mwq_linear_embeddingNotFrozen'
   wandb_project: 'loss_plateau_tf'
   save_ckpt: False

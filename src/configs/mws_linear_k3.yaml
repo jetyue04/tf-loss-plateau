@@ -32,5 +32,6 @@ train:
   stop_on_perfect_acc: true
   perfect_acc_patience: 50
   wandb: true
+  watch_log_freq: 10
   wandb_project: loss_plateau_tf
   wandb_run_name: mix_Sumk3_5kSteps_2heads
