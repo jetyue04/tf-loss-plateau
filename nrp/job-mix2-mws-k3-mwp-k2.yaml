@@ -15,7 +15,7 @@ spec:
         image: pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime
 
         command: ["/bin/bash"]
-        args: ["-c", "cd /workspace/tf-loss-plateau && PYTHONPATH=/workspace/site-packages python train.py --config src/configs/mix2_mws_k3_mwp_k2.yaml"]
+        args: ["-c", "apt-get update && apt-get install -y git && cd /workspace/tf-loss-plateau && git pull && PYTHONPATH=/workspace/site-packages python train.py --config src/configs/mix2_mws_k3_mwp_k2.yaml"]
 
         env:
         - name: PYTHONPATH
