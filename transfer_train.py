@@ -86,9 +86,22 @@ def run_phase(
     patience = config.train.get("perfect_acc_patience", 25)
     perfect_counter = 0
 
+    task_names = "_".join(data_samplers.keys())
+
     print(f"\n{'='*60}")
     print(f"  Starting {phase_name}  (tasks: {list(data_samplers.keys())})")
     print(f"{'='*60}\n")
+
+    if config.train.wandb:
+        base_run_name = config.train.get("wandb_run_name", phase_name)
+        wandb.init(
+            project=config.train.wandb_project,
+            name=f"{base_run_name}_{task_names}",
+            config=config.toDict(),
+            save_code=False,
+        )
+        watch_log_freq = config.train.get("watch_log_freq", 10)
+        wandb.watch(model, log="all", log_freq=watch_log_freq)
 
     for step in range(config.train.num_steps):
         overall_metrics = train_step(
@@ -137,6 +150,7 @@ def run_phase(
         artifact = wandb.Artifact(f"{phase_name}_final", type="model")
         artifact.add_file(final_ckpt_path)
         wandb.log_artifact(artifact)
+        wandb.finish()
 
     return global_step
 
@@ -237,14 +251,6 @@ def main(args):
     # W&B
     if config.train.wandb:
         wandb.login(key="")
-        wandb.init(
-            project=config.train.wandb_project,
-            name=config.train.get("wandb_run_name", None),
-            config=config.toDict(),
-            save_code=False,
-        )
-        watch_log_freq = config.train.get("watch_log_freq", 10)
-        wandb.watch(model, log="all", log_freq=watch_log_freq)
 
     # Data samplers
     all_samplers = prepare_data_samplers(config, device)
@@ -299,14 +305,11 @@ def main(args):
         ckpt_path=ckpt_phase2,
     )
 
-    # Weight comparison
+    # Weight comparison (printed to console only, both runs already finished)
     if config.transfer.get("compare_weights", True):
         base2, ext2 = os.path.splitext(ckpt_phase2)
         ckpt_phase2_final = f"{base2}_final{ext2}"
-        compare_checkpoints(ckpt_phase1_final, ckpt_phase2_final, wandb_enabled=config.train.wandb)
-
-    if config.train.wandb:
-        wandb.finish()
+        compare_checkpoints(ckpt_phase1_final, ckpt_phase2_final, wandb_enabled=False)
 
 
 if __name__ == "__main__":
