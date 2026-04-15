@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mix2-mws-k3-mwp-k2
+
+spec:
+  backoffLimit: 0
+
+  template:
+    spec:
+      restartPolicy: Never
+
+      containers:
+      - name: mix2-mws-k3-mwp-k2
+        image: pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime
+
+        command: ["/bin/bash"]
+        args: ["-c", "cd /workspace/tf-loss-plateau && PYTHONPATH=/workspace/site-packages python train.py --config src/configs/mix2_mws_k3_mwp_k2.yaml"]
+
+        env:
+        - name: PYTHONPATH
+          value: /workspace/site-packages
+
+        - name: WANDB_CONFIG_DIR
+          value: /workspace/.wandb
+
+        - name: WANDB_DIR
+          value: /workspace/.wandb
+
+        resources:
+          limits:
+            memory: "32Gi"
+            cpu: "8"
+            nvidia.com/gpu: 1
+
+        volumeMounts:
+        - mountPath: /workspace
+          name: workspace-storage
+
+      volumes:
+      - name: workspace-storage
+        persistentVolumeClaim:
+          claimName: loss-plateau-dev
