@@ -88,6 +88,10 @@ def run_phase(
 
     task_names = "_".join(data_samplers.keys())
 
+    # Disable train_step's own checkpoint saving — run_phase handles phase-specific checkpointing
+    do_save_ckpt = config.train.save_ckpt
+    config.train.save_ckpt = False
+
     print(f"\n{'='*60}")
     print(f"  Starting {phase_name}  (tasks: {list(data_samplers.keys())})")
     print(f"{'='*60}\n")
@@ -113,7 +117,7 @@ def run_phase(
             device=device,
         )
 
-        if config.train.save_ckpt and ((global_step + 1) % config.train.ckpt_freq == 0):
+        if do_save_ckpt and ((global_step + 1) % config.train.ckpt_freq == 0):
             base, ext = os.path.splitext(ckpt_path)
             step_ckpt_path = f"{base}_step{global_step:05d}{ext}"
             save_checkpoint(
@@ -152,6 +156,7 @@ def run_phase(
         wandb.log_artifact(artifact)
         wandb.finish()
 
+    config.train.save_ckpt = do_save_ckpt  # restore for next phase
     return global_step
 
 
