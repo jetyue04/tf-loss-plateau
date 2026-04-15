@@ -175,11 +175,13 @@ def train_step(
     for name, param in model.named_parameters():
         if param.grad is not None:
             grad_norm = param.grad.detach().norm(2).item()
-            grad_metrics[f"grad/{task_prefix}/{name}"] = grad_norm
+            grad_metrics[f"grad_{task_prefix}/{name}"] = grad_norm
     total_grad_norm = (
         sum(v ** 2 for v in grad_metrics.values()) ** 0.5
     )
-    grad_metrics[f"grad/{task_prefix}/total"] = total_grad_norm
+    grad_metrics[f"grad_{task_prefix}/total"] = total_grad_norm
+    if len(data_samplers) > 1:
+        grad_metrics["grad_total/total"] = total_grad_norm
 
     if config.train.grad_clip > 0:
         torch.nn.utils.clip_grad_norm_(model.parameters(), config.train.grad_clip)
@@ -238,7 +240,7 @@ def train_step(
         print(
             f"Step {step} -- Train loss: {overall_metrics['train_loss']}, "
             f"Train Acc: {overall_metrics['train_acc']} Test Acc: {overall_metrics['test_acc']} "
-            f"Total grad norm: {grad_metrics[f'grad/{task_prefix}/total']:.4f}"
+            f"Total grad norm: {grad_metrics[f'grad_{task_prefix}/total']:.4f}"
         )
 
         plt.close()
