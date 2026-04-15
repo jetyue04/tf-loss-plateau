@@ -23,6 +23,9 @@ spec:
     - name: WANDB_DIR
       value: /workspace/.wandb
 
+    - name: HOME
+      value: /workspace
+
     resources:
       limits:
         memory: "32Gi"
