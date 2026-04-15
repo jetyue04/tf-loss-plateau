@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mix2-mws-k3-mwp-k2
+  name: mix2-mws-k3-mwp-k2-2head
 
 spec:
   backoffLimit: 0
@@ -11,11 +11,11 @@ spec:
       restartPolicy: Never
 
       containers:
-      - name: mix2-mws-k3-mwp-k2
+      - name: mix2-mws-k3-mwp-k2-2head
         image: pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime
 
         command: ["/bin/bash"]
-        args: ["-c", "apt-get update && apt-get install -y git && cd /workspace/tf-loss-plateau && git pull && PYTHONPATH=/workspace/site-packages python train.py --config src/configs/mix2_mws_k3_mwp_k2.yaml"]
+        args: ["-c", "apt-get update && apt-get install -y git && cd /workspace/tf-loss-plateau && git pull && PYTHONPATH=/workspace/site-packages python train.py --config src/configs/mix2_mws_k3_mwp_k2_2head.yaml"]
 
         env:
         - name: PYTHONPATH
