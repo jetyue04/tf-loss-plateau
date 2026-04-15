@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: loss-plateau-pod
+
+spec:
+  restartPolicy: Never
+
+  containers:
+  - name: loss-plateau-container
+    image: pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime
+
+    command: ["/bin/bash"]
+    args: ["-c", "apt-get update && apt-get install -y git && sleep infinity"]
+
+    env:
+    - name: PYTHONPATH
+      value: /workspace/site-packages
+
+    - name: WANDB_CONFIG_DIR
+      value: /workspace/.wandb
+
+    - name: WANDB_DIR
+      value: /workspace/.wandb
+
+    resources:
+      limits:
+        memory: "32Gi"
+        cpu: "8"
+        nvidia.com/gpu: 1
+
+    volumeMounts:
+    - mountPath: /workspace
+      name: workspace-storage
+
+  volumes:
+  - name: workspace-storage
+    persistentVolumeClaim:
+      claimName: loss-plateau-dev

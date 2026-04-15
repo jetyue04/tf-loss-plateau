@@ -1,0 +1,27 @@
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: loss-plateau-dev
+# spec:
+#   storageClassName: rook-ceph-block
+#   accessModes:
+#     - ReadWriteOnce   # RWO is safest; RBD doesn’t support RWX
+#   resources:
+#     requests:
+#       storage: 50Gi
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: loss-plateau-dev
+  namespace: tianhaowang-ucsd
+
+spec:
+  storageClassName: rook-cephfs
+
+  accessModes:
+    - ReadWriteMany   # REQUIRED for CephFS
+
+  resources:
+    requests:
+      storage: 20Gi

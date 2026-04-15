@@ -1,4 +1,5 @@
 import math
+import os
 import random
 import yaml
 import argparse
@@ -64,20 +65,27 @@ def main(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # Set seeds
-    seed = getattr(config.train, "seed", 42)
+    seed = config.train.get("seed", 42)
     set_seed(seed)
 
     # Model settings -- May needs tweaking
     n_tasks = len(config.data.tasks)
     
     # if config does not specify vocab size, calculate dynamically
-    if not hasattr(config.model, "vocab_size") or config.model.vocab_size is None:
+    if not config.model.get("vocab_size", None):
         print("Calculating vocab size dynamically...")
         max_sep = max(task.sep for task in config.data.tasks)
         # config.model.vocab_size = max(getattr(config.data, "p", 17), config.data.max_num) + n_tasks
-        config.model.vocab_size = max(getattr(config.data, "p", 17), config.data.max_num, max_sep) + 1
+        config.model.vocab_size = max(config.data.get("p", 17), config.data.get("max_num", 16), max_sep) + 1
 
     config.model.block_size = 2 * config.data.num_tokens + 1
+
+    # Create checkpoint directory if needed
+    if getattr(config.train, "save_ckpt", False):
+        ckpt_path = getattr(config.train, "ckpt_path", "./checkpoint.tar")
+        ckpt_dir = os.path.dirname(ckpt_path)
+        if ckpt_dir:
+            os.makedirs(ckpt_dir, exist_ok=True)
 
     # Prepare data samplers
     data_samplers = prepare_data_samplers(config, device)
@@ -98,17 +106,15 @@ def main(args):
 
     # WandB setup
     if getattr(config.train, "wandb", False):
-        wandb_run_name = getattr(config.train, "wandb_run_name", None)
+        wandb_run_name = config.train.get("wandb_run_name", None)
         wandb.login(key="")
         wandb.init(project=config.train.wandb_project, name=wandb_run_name, config=config, save_code=False)
-        if getattr(config.train, "wandb_save_model", False):
-            wandb.watch(model, log="parameters")  # save model parameters
-        else:   
-            wandb.watch(model, log=None)        # metrics only, no model saved
+        watch_log_freq = config.train.get("watch_log_freq", 10)
+        wandb.watch(model, log="all", log_freq=watch_log_freq)
 
-    stop_on_perfect = getattr(config.train, "stop_on_perfect_acc", False)
-    perfect_patience = getattr(config.train, "perfect_acc_patience", 50)
-    # acc_eps = getattr(config.train, "perfect_acc_eps", 1e-6)
+    stop_on_perfect = config.train.get("stop_on_perfect_acc", False)
+    perfect_patience = config.train.get("perfect_acc_patience", 25)
+    # acc_eps = config.train.get("perfect_acc_eps", 1e-6)
 
     perfect_counter = 0
 

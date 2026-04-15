@@ -7,11 +7,20 @@ model:
 
 data:
   tasks:
+    - name: 'MovingWindowSum'
+      task: 'MovingWindowSum'
+      sep: 17
+      n_train: 64
+      n_test: 32
+      min_num: 1
+      max_num: 16
+      k: 3
+      p: 17
     - name: 'MovingWindowProduct'
       task: 'MovingWindowProduct'
-      sep: 17
-      n_train: 128
-      n_test: 64
+      sep: 18
+      n_train: 64
+      n_test: 32
       min_num: 1
       max_num: 16
       k: 2
@@ -22,14 +31,16 @@ data:
 train:
   lr: 0.0001
   grad_clip: -1
-  num_steps: 1000
+  num_steps: 50000
   wandb: True
   watch_log_freq: 10
-  wandb_run_name: 'mwp_linear_embeddingNotFrozen'
+  wandb_run_name: 'mix2_mws_k3_mwp_k2'
   wandb_project: 'loss_plateau_tf'
   save_ckpt: True
   ckpt_freq: 20
-  ckpt_path: './ckpts/mwp_linear_embeddingNotFrozen/checkpoint.tar'
+  ckpt_path: './ckpts/mix2_mws_k3_mwp_k2/checkpoint.tar'
   seed: 67
-  mask_input: True
+  mask_input: true
   freeze_embedding: false
+  stop_on_perfect_acc: true
+  perfect_acc_patience: 25

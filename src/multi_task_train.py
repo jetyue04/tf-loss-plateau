@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 from torch.nn.functional import cosine_similarity
@@ -161,12 +162,26 @@ def train_step(
     optim.zero_grad(set_to_none=True)
 
     _, _, _, loss = model(
-        train_data[:, :-1], 
-        targets=train_data[:, 1:], 
-        prompt_len=prompt_len, 
+        train_data[:, :-1],
+        targets=train_data[:, 1:],
+        prompt_len=prompt_len,
         mask_input=config.train.mask_input,
     )
     loss.backward()
+
+    # --- Gradient tracking ---
+    task_prefix = "_".join(data_samplers.keys())
+    grad_metrics = {}
+    for name, param in model.named_parameters():
+        if param.grad is not None:
+            grad_norm = param.grad.detach().norm(2).item()
+            grad_metrics[f"grad_{task_prefix}/{name}"] = grad_norm
+    total_grad_norm = (
+        sum(v ** 2 for v in grad_metrics.values()) ** 0.5
+    )
+    grad_metrics[f"grad_{task_prefix}/total"] = total_grad_norm
+    if len(data_samplers) > 1:
+        grad_metrics["grad_total/total"] = total_grad_norm
 
     if config.train.grad_clip > 0:
         torch.nn.utils.clip_grad_norm_(model.parameters(), config.train.grad_clip)
@@ -214,6 +229,7 @@ def train_step(
         if config.train.wandb:
             log_dict = {k: v for k, v in overall_metrics.items() if k not in ["cosine_sim_fig", "attn_head_figs"]}
             wandb.log(log_dict, step=step)
+            wandb.log(grad_metrics, step=step)
 
             wandb.log({"cosine_sim_fig": overall_metrics["cosine_sim_fig"]}, step=step)
             plt.close(overall_metrics["cosine_sim_fig"])
@@ -223,7 +239,8 @@ def train_step(
 
         print(
             f"Step {step} -- Train loss: {overall_metrics['train_loss']}, "
-            f"Train Acc: {overall_metrics['train_acc']} Test Acc: {overall_metrics['test_acc']}"
+            f"Train Acc: {overall_metrics['train_acc']} Test Acc: {overall_metrics['test_acc']} "
+            f"Total grad norm: {grad_metrics[f'grad_{task_prefix}/total']:.4f}"
         )
 
         plt.close()
@@ -238,24 +255,28 @@ def train_step(
 
         if config.train.save_ckpt:
             if (step == 0) or ((step + 1) % config.train.ckpt_freq == 0):
+                base_path = config.train.get("ckpt_path", "./checkpoint.tar")
+                base, ext = os.path.splitext(base_path)
+                ckpt_path = f"{base}_step{step:05d}{ext}"
+                os.makedirs(os.path.dirname(ckpt_path) or ".", exist_ok=True)
                 model.train()
                 torch.save(
                     {
-                        "epoch": step,
+                        "step": step,
                         "model": model.state_dict(),
                         "optim": optim.state_dict(),
                         "train_loss": overall_metrics['train_loss'],
                         "test_acc": overall_metrics['test_acc'],
                     },
-                    "./mws_k2_l1_h1_a16_n16.tar",
+                    ckpt_path,
                 )
-                print(f"saved state at epoch {step} to {f'./mws_k2_l1_h1_a16_n16.tar'}")
+                print(f"Saved checkpoint at step {step} to {ckpt_path}")
 
                 if config.train.wandb:
                     model_wandb = wandb.Artifact(
                         f"model_step{step}", type="model"
                     )
-                    model_wandb.add_file(f"./mws_k2_l1_h1_a16_n16.tar")
+                    model_wandb.add_file(ckpt_path)
                     wandb.log_artifact(model_wandb)
                     print("model uploaded to wandb")
     return overall_metrics
